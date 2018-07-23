@@ -34,7 +34,7 @@ namespace Course_3_4 {
 
 				byte[] bytes = File.ReadAllBytes(fMP3Path);
 
-				//створюємо txt файл
+				//create txt file
 				if (File.Exists(fTXTPath))
 					File.Delete(fTXTPath);
 

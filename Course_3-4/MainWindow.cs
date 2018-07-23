@@ -15,12 +15,12 @@ namespace Course_3_4 {
 
 		private Converter converter;
 
-		//запис
-		private WaveIn sourceStream = null;	//потік
-		private DirectSoundOut waveDirectOut = null;  //для програвання
-		private WaveFileWriter waveWriter = null; //для запису
+		//recording
+		private WaveIn sourceStream = null;	//stream
+		private DirectSoundOut waveDirectOut = null;  //for playing
+		private WaveFileWriter waveWriter = null; //for recording
 		
-		//прослуховування
+		//listening
 		private WaveOutEvent waveOut;
 
 		public MainWindow() {
@@ -29,7 +29,7 @@ namespace Course_3_4 {
 			converter = new Converter();
 			labelFileToConv.Text = "..." + converter.MP3FileName;
 
-			//список мікрофонів
+			//micro list
 			setupMicList();
 
 
@@ -47,7 +47,7 @@ namespace Course_3_4 {
 			int waveInDevices = WaveIn.DeviceCount;
 
 			for (int i = 0; i < waveInDevices; i++) {
-				WaveInCapabilities deviceInfo = WaveIn.GetCapabilities(i);  //інформація про девайс
+				WaveInCapabilities deviceInfo = WaveIn.GetCapabilities(i);  //device info
 
 				devicesComboBox.Items.Add(deviceInfo.ProductName);
 			}
@@ -67,29 +67,28 @@ namespace Course_3_4 {
 
 			int deviceNumber = devicesComboBox.SelectedIndex;
 
-			//ініціалізація потоку запису
+			//recorging stream init
 			sourceStream = new WaveIn();
 			sourceStream.DeviceNumber = deviceNumber;
 			sourceStream.WaveFormat = new WaveFormat(44100, WaveIn.GetCapabilities(deviceNumber).Channels);
 
-			////створюємо провайдер
+			////creating provider
 			//WaveInProvider waveIn = new WaveInProvider(sourceStream);
 
-			////для виводу
 			//waveDirectOut = new DirectSoundOut();
 			//waveDirectOut.Init(waveIn);
 
-			////починаємо читати
+			////start reading
 			//sourceStream.StartRecording();
 			//waveDirectOut.Play();	//відтворення безпосередньо
 
-			//збереження у файл
-			sourceStream.DataAvailable += SourceStream_DataAvailable;   //подія
+			//saving
+			sourceStream.DataAvailable += SourceStream_DataAvailable;
 			waveWriter = new WaveFileWriter(save.FileName, sourceStream.WaveFormat);
-			
 
-			//починаємо запис
-			sourceStream.StartRecording();
+
+            //start recording
+            sourceStream.StartRecording();
 
 		}
 
@@ -97,20 +96,20 @@ namespace Course_3_4 {
 
 			if (waveWriter == null) return;
 
-			waveWriter.Write(e.Buffer, 0, e.BytesRecorded); //записуємо
+			waveWriter.Write(e.Buffer, 0, e.BytesRecorded); //writing
 
-			//візуалізація
+			//visualisation
 			byte[] buffer = e.Buffer;
 
 			for (int index = 0; index < e.BytesRecorded; index += 2000) {
 
 				short sample = BitConverter.ToInt16(buffer, index);
 				float sample32 = sample / 32768f;
-				sample32 *= 2;  //збільшуємо амплітуду для наочності
+				sample32 *= 2;  //increasing amplitude for better visualisation
 				waveformPainter.AddMax(sample32);
 			}
 			
-			waveWriter.Flush(); //очистка буферу
+			waveWriter.Flush();
 
 		}
 
@@ -149,26 +148,26 @@ namespace Course_3_4 {
 			startListenButton.Enabled = false;
 			stopListenButton.Enabled = true;
 
-			waveOut = new WaveOutEvent();   //потік
+			waveOut = new WaveOutEvent();   //stream
 
 			if (open.FileName.EndsWith(".mp3")) {
 
 				Mp3FileReader mp3Reader = new Mp3FileReader(open.FileName); //reader
-				waveOut.Init(mp3Reader);    //зв'язуємо
+				waveOut.Init(mp3Reader);
 
-				waveOut.Play(); //починаємо програвати
+				waveOut.Play(); //start playing
 
 
 			}
 			else if (open.FileName.EndsWith(".wav")) {
 
 				WaveFileReader waveReader = new WaveFileReader(open.FileName); //reader
-				waveOut.Init(waveReader);    //зв'язуємо
+				waveOut.Init(waveReader);
 
-				waveOut.Play(); //починаємо програвати
+				waveOut.Play(); //start playing
 
-				
-			}
+
+            }
 		}
 
 		private void stopListenButton_Click(object sender, EventArgs e) {
